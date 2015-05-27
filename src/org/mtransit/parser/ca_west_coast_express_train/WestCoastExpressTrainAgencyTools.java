@@ -154,14 +154,11 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		return MSpec.cleanLabel(tripHeadsign);
 	}
 
-	private static final Pattern ENDS_WITH_BOUND = Pattern.compile("((east|west|north|south)bound$)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern ENDS_WITH_BOUND = Pattern.compile("((east|west|north|south)(bound)?[\\s]*$)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern STATION_STN = Pattern.compile("(station|stn)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern UNLOADING = Pattern.compile("(unload(ing)?( only)?$)", Pattern.CASE_INSENSITIVE);
-
-	private static final Pattern TRAIN_BUS = Pattern.compile("(trainbus)", Pattern.CASE_INSENSITIVE);
-	private static final String TRAINBUS = "TrainBus";
 
 	@Override
 	public String cleanStopName(String gStopName) {
@@ -170,7 +167,6 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		gStopName = UNLOADING.matcher(gStopName).replaceAll(StringUtils.EMPTY);
 		gStopName = WCE_LINE_TO.matcher(gStopName).replaceAll(StringUtils.EMPTY);
 		gStopName = ENDS_WITH_BOUND.matcher(gStopName).replaceAll(StringUtils.EMPTY);
-		gStopName = TRAIN_BUS.matcher(gStopName).replaceAll(TRAINBUS);
 		gStopName = MSpec.cleanStreetTypes(gStopName);
 		return MSpec.cleanLabel(gStopName);
 	}
