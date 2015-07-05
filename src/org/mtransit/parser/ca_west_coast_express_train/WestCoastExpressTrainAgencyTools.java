@@ -61,14 +61,12 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		return super.excludeCalendarDate(gCalendarDates);
 	}
 
-	private static final String INCLUDE_AGENCY_ID = "WCEX"; // West Coast Express only
-
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
-		if (!INCLUDE_AGENCY_ID.equals(gRoute.agency_id)) {
+		if (!RSN_WCE.equals(gRoute.route_short_name)) {
 			return true;
 		}
-		return super.excludeRoute(gRoute);
+		return gRoute.route_type != MAgency.ROUTE_TYPE_BUS; // declared as bus but we classify it as a train
 	}
 
 	private static final String TRAINBUS_THS_LC = "trainbus";
@@ -119,6 +117,11 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 	@Override
 	public String getAgencyColor() {
 		return AGENCY_COLOR;
+	}
+
+	@Override
+	public String getRouteColor(GRoute gRoute) {
+		return null; // use agency color
 	}
 
 	private static final long RID_WCE = 997l;
