@@ -16,7 +16,7 @@ import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MSpec;
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.mt.data.MTrip;
 
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources.aspx
@@ -38,11 +38,11 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public void start(String[] args) {
-		System.out.printf("Generating West Coast Express train data...\n");
+		System.out.printf("\nGenerating West Coast Express train data...\n");
 		long start = System.currentTimeMillis();
 		this.serviceIds = extractUsefulServiceIds(args, this);
 		super.start(args);
-		System.out.printf("Generating West Coast Express train data... DONE in %s.\n", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		System.out.printf("\nGenerating West Coast Express train data... DONE in %s.\n", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
-		return MSpec.cleanLabel(gRoute.route_long_name.toLowerCase(Locale.ENGLISH));
+		return CleanUtils.cleanLabel(gRoute.route_long_name.toLowerCase(Locale.ENGLISH));
 	}
 
 	private static final String AGENCY_COLOR_VIOLET = "711E8C"; // VIOLET (from PDF map)
@@ -153,7 +153,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		tripHeadsign = STARTS_WITH_QUOTE.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = ENDS_WITH_QUOTE.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = WCE_LINE_TO.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
-		return MSpec.cleanLabel(tripHeadsign);
+		return CleanUtils.cleanLabel(tripHeadsign);
 	}
 
 	private static final Pattern ENDS_WITH_BOUND = Pattern.compile("((east|west|north|south)(bound)?[\\s]*$)", Pattern.CASE_INSENSITIVE);
@@ -169,8 +169,8 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		gStopName = UNLOADING.matcher(gStopName).replaceAll(StringUtils.EMPTY);
 		gStopName = WCE_LINE_TO.matcher(gStopName).replaceAll(StringUtils.EMPTY);
 		gStopName = ENDS_WITH_BOUND.matcher(gStopName).replaceAll(StringUtils.EMPTY);
-		gStopName = MSpec.cleanStreetTypes(gStopName);
-		return MSpec.cleanLabel(gStopName);
+		gStopName = CleanUtils.cleanStreetTypes(gStopName);
+		return CleanUtils.cleanLabel(gStopName);
 	}
 
 	@Override
