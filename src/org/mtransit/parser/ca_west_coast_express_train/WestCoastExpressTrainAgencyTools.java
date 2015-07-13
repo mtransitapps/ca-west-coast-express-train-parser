@@ -38,7 +38,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public void start(String[] args) {
-		System.out.printf("\nGenerating West Coast Express train data...\n");
+		System.out.printf("\nGenerating West Coast Express train data...");
 		long start = System.currentTimeMillis();
 		this.serviceIds = extractUsefulServiceIds(args, this);
 		super.start(args);
@@ -66,7 +66,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		if (!RSN_WCE.equals(gRoute.route_short_name)) {
 			return true;
 		}
-		return gRoute.route_type != MAgency.ROUTE_TYPE_BUS; // declared as bus but we classify it as a train
+		return super.excludeRoute(gRoute);
 	}
 
 	private static final String TRAINBUS_THS_LC = "trainbus";
