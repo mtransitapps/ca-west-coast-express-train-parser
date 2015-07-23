@@ -63,7 +63,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
-		if (!RSN_WCE.equals(gRoute.route_short_name)) {
+		if (!RSN_WCE.equals(gRoute.getRouteShortName())) {
 			return true;
 		}
 		return super.excludeRoute(gRoute);
@@ -73,7 +73,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public boolean excludeTrip(GTrip gTrip) {
-		if (gTrip.trip_headsign.toLowerCase(Locale.ENGLISH).contains(TRAINBUS_THS_LC)) {
+		if (gTrip.getTripHeadsign().toLowerCase(Locale.ENGLISH).contains(TRAINBUS_THS_LC)) {
 			return true; // TrainBus is a bus, not a train
 		}
 		if (this.serviceIds != null) {
@@ -89,7 +89,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		return Long.parseLong(gRoute.route_short_name); // use route short name as route ID
+		return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
 	}
 
 	private static final String RSN_WCE = "997";
@@ -97,7 +97,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
-		if (RSN_WCE.equals(gRoute.route_short_name)) {
+		if (RSN_WCE.equals(gRoute.getRouteShortName())) {
 			return WCE_SHORT_NAME;
 		}
 		System.out.println("Unexpected route short name " + gRoute);
@@ -107,7 +107,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
-		return CleanUtils.cleanLabel(gRoute.route_long_name.toLowerCase(Locale.ENGLISH));
+		return CleanUtils.cleanLabel(gRoute.getRouteLongName().toLowerCase(Locale.ENGLISH));
 	}
 
 	private static final String AGENCY_COLOR_VIOLET = "711E8C"; // VIOLET (from PDF map)
@@ -129,10 +129,10 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		if (mRoute.id == RID_WCE) {
-			if (gTrip.direction_id == 0) {
+			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.EAST);
 				return;
-			} else if (gTrip.direction_id == 1) {
+			} else if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
 				return;
 			}
@@ -175,9 +175,9 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public int getStopId(GStop gStop) {
-		if (!StringUtils.isEmpty(gStop.stop_code) && Utils.isDigitsOnly(gStop.stop_code)) {
-			return Integer.parseInt(gStop.stop_code); // using stop code as stop ID
+		if (!StringUtils.isEmpty(gStop.getStopCode()) && Utils.isDigitsOnly(gStop.getStopCode())) {
+			return Integer.parseInt(gStop.getStopCode()); // using stop code as stop ID
 		}
-		return 1000000 + Integer.parseInt(gStop.stop_id);
+		return 1000000 + Integer.parseInt(gStop.getStopId());
 	}
 }
