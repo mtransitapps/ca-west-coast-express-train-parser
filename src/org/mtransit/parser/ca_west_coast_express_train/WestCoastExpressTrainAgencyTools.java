@@ -96,10 +96,18 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
+		if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
+			return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
+		}
+		if (RSN_WCE.equals(gRoute.getRouteShortName())) {
+			return RID_WCE;
+		}
+		System.out.println("Unexpected route short name " + gRoute);
+		System.exit(-1);
+		return -1l;
 	}
 
-	private static final String RSN_WCE = "997";
+	private static final String RSN_WCE = "WCE";
 	private static final String WCE_SHORT_NAME = "WCE";
 
 	@Override
@@ -146,6 +154,16 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		}
 		System.out.printf("Unexpected trip (unexpected route ID: %s): %s\n", mRoute.getId(), gTrip);
 		System.exit(-1);
+	}
+
+	@Override
+	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
+		if (isGoodEnoughAccepted()) {
+			return super.mergeHeadsign(mTrip, mTripToMerge);
+		}
+		System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
+		System.exit(-1);
+		return false;
 	}
 
 	private static final Pattern STARTS_WITH_QUOTE = Pattern.compile("(^\")", Pattern.CASE_INSENSITIVE);
