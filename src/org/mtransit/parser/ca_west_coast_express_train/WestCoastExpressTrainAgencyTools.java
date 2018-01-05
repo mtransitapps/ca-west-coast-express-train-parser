@@ -107,7 +107,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		return -1l;
 	}
 
-	private static final String RSN_WCE = "WCE";
+	private static final String RSN_WCE = "997"; // "WCE";
 	private static final String WCE_SHORT_NAME = "WCE";
 
 	@Override
