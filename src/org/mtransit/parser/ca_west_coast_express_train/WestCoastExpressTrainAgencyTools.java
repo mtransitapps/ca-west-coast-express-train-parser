@@ -1,6 +1,8 @@
 package org.mtransit.parser.ca_west_coast_express_train;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -70,7 +72,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		if (!INCLUDE_AGENCY_ID.equals(gRoute.getAgencyId())) {
 			return true; // exclude
 		}
-		if (!RSN_WCE.equals(gRoute.getRouteShortName())) {
+		if (!RSN_WCE.contains(gRoute.getRouteShortName())) {
 			return true; // exclude
 		}
 		return false; // keep
@@ -99,7 +101,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
 			return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
 		}
-		if (RSN_WCE.equals(gRoute.getRouteShortName())) {
+		if (RSN_WCE.contains(gRoute.getRouteShortName())) {
 			return RID_WCE;
 		}
 		System.out.println("Unexpected route short name " + gRoute);
@@ -107,12 +109,12 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		return -1l;
 	}
 
-	private static final String RSN_WCE = "997"; // "WCE";
+	private static final List<String> RSN_WCE = Arrays.asList(new String[] { "997", "WCE" });
 	private static final String WCE_SHORT_NAME = "WCE";
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
-		if (RSN_WCE.equals(gRoute.getRouteShortName())) {
+		if (RSN_WCE.contains(gRoute.getRouteShortName())) {
 			return WCE_SHORT_NAME;
 		}
 		System.out.println("Unexpected route short name " + gRoute);
