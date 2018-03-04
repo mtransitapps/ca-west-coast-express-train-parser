@@ -65,13 +65,8 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		return super.excludeCalendarDate(gCalendarDates);
 	}
 
-	private static final String INCLUDE_AGENCY_ID = "WCEX"; // West Coast Express only
-
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
-		if (!INCLUDE_AGENCY_ID.equals(gRoute.getAgencyId())) {
-			return true; // exclude
-		}
 		if (!RSN_WCE.contains(gRoute.getRouteShortName())) {
 			return true; // exclude
 		}
