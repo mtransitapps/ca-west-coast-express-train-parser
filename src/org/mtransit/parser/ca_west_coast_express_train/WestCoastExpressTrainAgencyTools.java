@@ -104,7 +104,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		return -1l;
 	}
 
-	private static final List<String> RSN_WCE = Arrays.asList(new String[] { "997", "WCE" });
+	private static final List<String> RSN_WCE = Arrays.asList(new String[] { "997", "WCE", "WEST COAST EXPRESS" });
 	private static final String WCE_SHORT_NAME = "WCE";
 
 	@Override
