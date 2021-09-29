@@ -1,29 +1,21 @@
 package org.mtransit.parser.ca_west_coast_express_train;
 
+import static org.mtransit.commons.StringUtils.EMPTY;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mtransit.parser.CleanUtils;
+import org.mtransit.commons.CharUtils;
+import org.mtransit.commons.CleanUtils;
+import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
-import org.mtransit.parser.MTLog;
-import org.mtransit.parser.StringUtils;
-import org.mtransit.parser.Utils;
-import org.mtransit.parser.gtfs.data.GCalendar;
-import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GRoute;
-import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
-import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
-import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MTrip;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
-
-import static org.mtransit.parser.StringUtils.EMPTY;
 
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources.aspx
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources/GTFS-Data.aspx
@@ -33,70 +25,34 @@ import static org.mtransit.parser.StringUtils.EMPTY;
 // http://gtfs.translink.ca/static/latest
 public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
-	public static void main(@Nullable String[] args) {
-		if (args == null || args.length == 0) {
-			args = new String[3];
-			args[0] = "input/gtfs.zip";
-			args[1] = "../../mtransitapps/ca-west-coast-express-train-android/res/raw/";
-			args[2] = ""; // files-prefix
-		}
+	public static void main(@NotNull String[] args) {
 		new WestCoastExpressTrainAgencyTools().start(args);
 	}
 
 	@Nullable
-	private HashSet<Integer> serviceIdInts;
-
 	@Override
-	public void start(@NotNull String[] args) {
-		MTLog.log("Generating West Coast Express train data...");
-		long start = System.currentTimeMillis();
-		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true);
-		super.start(args);
-		MTLog.log("Generating West Coast Express train data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+	public List<Locale> getSupportedLanguages() {
+		return LANG_EN;
 	}
 
 	@Override
-	public boolean excludingAll() {
-		return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
+	public boolean defaultExcludeEnabled() {
+		return true;
 	}
 
+	@NotNull
 	@Override
-	public boolean excludeCalendar(@NotNull GCalendar gCalendar) {
-		if (this.serviceIdInts != null) {
-			return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
-		}
-		return super.excludeCalendar(gCalendar);
-	}
-
-	@Override
-	public boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDates) {
-		if (this.serviceIdInts != null) {
-			return excludeUselessCalendarDateInt(gCalendarDates, this.serviceIdInts);
-		}
-		return super.excludeCalendarDate(gCalendarDates);
+	public String getAgencyName() {
+		return "West Coast Express";
 	}
 
 	@Override
 	public boolean excludeRoute(@NotNull GRoute gRoute) {
 		//noinspection RedundantIfStatement
 		if (!RSN_WCE.contains(gRoute.getRouteShortName())) {
-			return true; // exclude
+			return EXCLUDE;
 		}
-		return false; // keep
-	}
-
-	private static final String TRAIN_BUS_THS_LC = "trainbus";
-
-	@Override
-	public boolean excludeTrip(@NotNull GTrip gTrip) {
-		final String tripHeadSignLC = gTrip.getTripHeadsignOrDefault().toLowerCase(Locale.ENGLISH);
-		if (tripHeadSignLC.contains(TRAIN_BUS_THS_LC)) {
-			return true; // TrainBus is a bus, not a train
-		}
-		if (this.serviceIdInts != null) {
-			return excludeUselessTripInt(gTrip, this.serviceIdInts);
-		}
-		return super.excludeTrip(gTrip);
+		return KEEP;
 	}
 
 	@NotNull
@@ -106,39 +62,60 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 	}
 
 	@Override
-	public long getRouteId(@NotNull GRoute gRoute) {
-		if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
-			return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
-		}
-		if (RSN_WCE.contains(gRoute.getRouteShortName())) {
+	public boolean defaultRouteIdEnabled() {
+		return true;
+	}
+
+	@Override
+	public boolean useRouteShortNameForRouteId() {
+		return true;
+	}
+
+	private static final long RID_WCE = 997L;
+
+	@Nullable
+	@Override
+	public Long convertRouteIdFromShortNameNotSupported(@NotNull String routeShortName) {
+		switch (routeShortName) {
+		case "WCE":
 			return RID_WCE;
 		}
-		throw new MTLog.Fatal("Unexpected route short name for %s!", gRoute);
+		return super.convertRouteIdFromShortNameNotSupported(routeShortName);
 	}
 
 	private static final List<String> RSN_WCE = Arrays.asList("997", "WCE", "WEST COAST EXPRESS");
 	private static final String WCE_SHORT_NAME = "WCE";
 
-	@Nullable
+	@NotNull
 	@Override
-	public String getRouteShortName(@NotNull GRoute gRoute) {
-		if (RSN_WCE.contains(gRoute.getRouteShortName())) {
-			return WCE_SHORT_NAME;
+	public String provideMissingRouteShortName(@NotNull GRoute gRoute) {
+		final String routeLongNameLC = gRoute.getRouteLongNameOrDefault().toLowerCase(getFirstLanguageNN());
+		if (routeLongNameLC.equals("west coast express")) {
+			return "WCE";
 		}
-		throw new MTLog.Fatal("Unexpected route short name for %s!", gRoute);
+		return super.provideMissingRouteShortName(gRoute);
+	}
+
+	@Override
+	public boolean defaultRouteLongNameEnabled() {
+		return true;
 	}
 
 	private static final Pattern WCE_ = Pattern.compile("((^|\\W)(west coast express)(\\W|$))", Pattern.CASE_INSENSITIVE);
 
 	@NotNull
 	@Override
-	public String getRouteLongName(@NotNull GRoute gRoute) {
-		String routeLongName = gRoute.getRouteLongName();
+	public String cleanRouteLongName(@NotNull String routeLongName) {
 		routeLongName = WCE_.matcher(routeLongName).replaceAll(EMPTY); // removing trade-mark
 		return routeLongName;
 	}
 
-	private static final String AGENCY_COLOR_VIOLET = "711E8C"; // VIOLET (from PDF map)
+	@Override
+	public boolean defaultAgencyColorEnabled() {
+		return true;
+	}
+
+	private static final String AGENCY_COLOR_VIOLET = "87189D"; // VIOLET (from GTFS)
 
 	private static final String AGENCY_COLOR = AGENCY_COLOR_VIOLET;
 
@@ -148,36 +125,15 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 		return AGENCY_COLOR;
 	}
 
-	@Nullable
-	@Override
-	public String getRouteColor(@NotNull GRoute gRoute) {
-		return null; // use agency color
-	}
-
-	private static final long RID_WCE = 997L;
-
-	@Override
-	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
-		mTrip.setHeadsignString(
-				cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
-				gTrip.getDirectionIdOrDefault()
-		);
-	}
-
 	@Override
 	public boolean directionFinderEnabled() {
 		return true;
 	}
 
-	@Override
-	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
-		throw new MTLog.Fatal("%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
-	}
-
 	@NotNull
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
-		tripHeadsign = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, tripHeadsign);
+		tripHeadsign = CleanUtils.toLowerCaseUpperCaseWords(getFirstLanguageNN(), tripHeadsign);
 		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
 	}
@@ -191,7 +147,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
-		gStopName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, gStopName);
+		gStopName = CleanUtils.toLowerCaseUpperCaseWords(getFirstLanguageNN(), gStopName);
 		gStopName = STATION_STN.matcher(gStopName).replaceAll(EMPTY);
 		gStopName = UNLOADING.matcher(gStopName).replaceAll(EMPTY);
 		gStopName = WCE_.matcher(gStopName).replaceAll(WCE_REPLACEMENT);
@@ -202,7 +158,7 @@ public class WestCoastExpressTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public int getStopId(@NotNull GStop gStop) {
-		if (!StringUtils.isEmpty(gStop.getStopCode()) && Utils.isDigitsOnly(gStop.getStopCode())) {
+		if (!StringUtils.isEmpty(gStop.getStopCode()) && CharUtils.isDigitsOnly(gStop.getStopCode())) {
 			return Integer.parseInt(gStop.getStopCode()); // using stop code as stop ID
 		}
 		//noinspection deprecation
